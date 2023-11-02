@@ -9,11 +9,18 @@ import logging
 
 
 class RedactingFormatter(logging.Formatter):
+    """
+    Custom log formatter for redacting sensitive information.
+    """
+
     REDACTION = 'xxx'
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
 
     def format(self, record: logging.LogRecord) -> str:
+        """
+        Format log record while redacting sensitive fields.
+        """
         redacted_message = record.getMessage()
         fields = os.environ.get("FIELDS", "").split(",")
         for field in fields:
@@ -26,16 +33,7 @@ class RedactingFormatter(logging.Formatter):
 
 def filter_datum(fields, redaction, message, separator):
     """
-    Filter sensitive information in a message.
-
-    Args:
-        fields (list): List of fields to filter.
-        redaction (str): Redaction string to replace filtered content.
-        message (str): The input message containing sensitive data.
-        separator (str): The separator character used in the message.
-
-    Returns:
-        str: The message with sensitive information redacted.
+    Redact specific fields in a log message.
     """
     for field in fields:
         pattern = re.compile(rf"{field}=.*?{separator}")
