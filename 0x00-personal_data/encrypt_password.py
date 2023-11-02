@@ -1,32 +1,29 @@
 #!/usr/bin/env python3
-
+"""
+Defines a hash_password function to return a hashed password
+"""
 import bcrypt
+from bcrypt import hashpw
 
 
 def hash_password(password: str) -> bytes:
     """
-    Hashes a password using bcrypt.
-
+    Returns a hashed password
     Args:
-        password (str): The password to hash.
-
-    Returns:
-        bytes: The salted and hashed password.
+        password (str): password to be hashed
     """
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
+    b = password.encode()
+    hashed = hashpw(b, bcrypt.gensalt())
+    return hashed
 
 
 def is_valid(hashed_password: bytes, password: str) -> bool:
     """
-    Validates a password against a hashed password using bcrypt.
-
+    Check whether a password is valid
     Args:
-        hashed_password (bytes): The hashed password.
-        password (str): The password to check.
-
-    Returns:
-        bool: True if the password is valid, False otherwise.
+        hashed_password (bytes): hashed password
+        password (str): password in string
+    Return:
+        bool
     """
-    return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
+    return bcrypt.checkpw(password.encode(), hashed_password)
