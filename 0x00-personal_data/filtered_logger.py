@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Main file
+filtered_logger module
 """
 
 import re
@@ -25,6 +25,18 @@ class RedactingFormatter(logging.Formatter):
 
 
 def filter_datum(fields, redaction, message, separator):
+    """
+    Filter sensitive information in a message.
+
+    Args:
+        fields (list): List of fields to filter.
+        redaction (str): Redaction string to replace filtered content.
+        message (str): The input message containing sensitive data.
+        separator (str): The separator character used in the message.
+
+    Returns:
+        str: The message with sensitive information redacted.
+    """
     for field in fields:
         pattern = re.compile(rf"{field}=.*?{separator}")
         message = re.sub(pattern, f"{field}={redaction}{separator}", message)
