@@ -1,50 +1,105 @@
 #!/usr/bin/env python3
 """
-filtered_logger module
+Definition of filter_datum function that returns an obfuscated log message
 """
-
+from typing import List
 import re
-import os
 import logging
+import os
+import mysql.connector
 
 
-class RedactingFormatter(logging.Formatter):
+PII_FIELDS = ('name', 'email', 'phone', 'ssn', 'password')
+
+
+def filter_datum(fields: List[str], redaction: str,
+                 message: str, separator: str) -> str:
     """
-    Custom log formatter for redacting sensitive information.
-    """
-
-    REDACTION = 'xxx'
-    FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
-    SEPARATOR = ";"
-
-    def format(self, record: logging.LogRecord) -> str:
-        """
-        Format log record while redacting sensitive fields.
-        """
-        redacted_message = record.getMessage()
-        fields = os.environ.get("FIELDS", "").split(",")
-        for field in fields:
-            redacted_message = re.sub(
-                f"{field}=.*?{self.SEPARATOR}",
-                f"{field}={self.REDACTION}{self.SEPARATOR}", redacted_message)
-        record.message = redacted_message
-        return super().format(record)
-
-
-def filter_datum(fields, redaction, message, separator):
-    """
-    Redact specific fields in a log message.
+    Return an obfuscated log message
+    Args:
+        fields (list): list of strings indicating fields to obfuscate
+        redaction (str): what the field will be obfuscated to
+        message (str): the log line to obfuscate
+        separator (str): the character separating the fields
     """
     for field in fields:
-        pattern = re.compile(rf"{field}=.*?{separator}")
-        message = re.sub(pattern, f"{field}={redaction}{separator}", message)
+        message = re.sub(field+'=.*?'+separator,
+                         field+'='+redaction+separator, message)
     return message
 
 
+class RedactingFormatter(logging.Formatter):
+    """ Redacting Formatter class
+        """
+
+    REDACTION = "***"
+    FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
+    SEPARATOR = ";"
+
+    def __init__(self, fields: List[str]):
+        super(RedactingFormatter, self).__init__(self.FORMAT)
+        self.fields = fields
+
+    def format(self, record: logging.LogRecord) -> str:
+        """
+        redact the message of LogRecord instance
+        Args:
+        record (logging.LogRecord): LogRecord instance containing message
+        Return:
+            formatted string
+        """
+        message = super(RedactingFormatter, self).format(record)
+        redacted = filter_datum(self.fields, self.REDACTION,
+                                message, self.SEPARATOR)
+        return redacted
+
+
+def get_logger() -> logging.Logger:
+    """
+    Return a logging.Logger object
+    """
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    handler = logging.StreamHandler()
+
+    formatter = RedactingFormatter(PII_FIELDS)
+
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
+
+def get_db() -> mysql.connector.connection.MySQLConnection:
+    """
+    """
+    user = os.getenv('PERSONAL_DATA_DB_USERNAME') or "root"
+    passwd = os.getenv('PERSONAL_DATA_DB_PASSWORD') or ""
+    host = os.getenv('PERSONAL_DATA_DB_HOST') or "localhost"
+    db_name = os.getenv('PERSONAL_DATA_DB_NAME')
+    conn = mysql.connector.connect(user=user,
+                                   password=passwd,
+                                   host=host,
+                                   database=db_name)
+    return conn
+
+
+def main():
+    """
+    main entry point
+    """
+    db = get_db()
+    logger = get_logger()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users;")
+    fields = cursor.column_names
+    for row in cursor:
+        message = "".join("{}={}; ".format(k, v) for k, v in zip(fields, row))
+        logger.info(message.strip())
+    cursor.close()
+    db.close()
+
+
 if __name__ == "__main__":
-    message = ("name=Bob;email=bob@dylan.com;"
-               "ssn=000-123-0000;password=bobby2019;")
-    log_record = logging.LogRecord("my_logger", logging.INFO, None, None,
-                                   message, None, None)
-    formatter = RedactingFormatter()
-    print(formatter.format(log_record))
+    main()

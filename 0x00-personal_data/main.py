@@ -10,16 +10,15 @@ import logging
 
 class RedactingFormatter(logging.Formatter):
     """
-    Custom log formatter for redacting sensitive information.
+    Redacting Formatter class for logging.
     """
-
     REDACTION = 'xxx'
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
 
     def format(self, record: logging.LogRecord) -> str:
         """
-        Format log record while redacting sensitive fields.
+        Format a log record, redacting sensitive fields.
         """
         redacted_message = record.getMessage()
         fields = os.environ.get("FIELDS", "").split(",")
