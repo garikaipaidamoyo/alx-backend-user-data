@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 
-""" Main 0
-"""
-from auth import Auth
+from api.v1.app import create_app
 
-a = Auth()
+app = create_app()
 
-print(a.require_auth("/api/v1/status/", ["/api/v1/status/"]))
-print(a.authorization_header())
-print(a.current_user())
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
