@@ -1,42 +1,43 @@
 #!/usr/bin/env python3
 """
-Auth class
+Auth class defined here
 """
-
-from tabnanny import check
-from flask import request
-from typing import TypeVar, List
-User = TypeVar('User')
+from flask import abort, request
+from typing import List, TypeVar
+from models.user import User
+import re
 
 
 class Auth:
-    """
-    a class to manage the API authentication
-    """
+    """ Auth class """
 
-    def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """
-        returns False - path and excluded_paths
-        """
-        check = path
-        if path is None or excluded_paths is None or len(excluded_paths) == 0:
+    def require_auth(
+        self, path: str, excluded_paths: List[str]
+    ) -> bool:
+        """ determines if authentication is required """
+        if path is None or not excluded_paths:
             return True
-        if path[-1] != "/":
-            check += "/"
-        if check in excluded_paths or path in excluded_paths:
-            return False
+
+        if path[-1] != '/':
+            path = path + '/'
+        for pth in excluded_paths:
+            if pth[-1] == '*':
+                pth = pth[:-1] + '.*'
+            if re.fullmatch(pth, path):
+                return False
+
         return True
 
     def authorization_header(self, request=None) -> str:
-        """
-        returns None - request
-        """
+        """ doc str """
         if request is None:
             return None
-        return request.headers.get("Authorization")
 
-    def current_user(self, request=None) -> User:
-        """
-        returns None - request
-        """
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            return auth_header
+        return None
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """ doc str """
         return None
