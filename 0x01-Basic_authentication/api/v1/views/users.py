@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
 """ Module of Users views
 """
-
+from api.v1.views import app_views
 from flask import abort, jsonify, request
 from models.user import User
-from flask import Blueprint
-
-app_views = Blueprint("app_views", __name__, url_prefix="/api/v1")
-
-def display_name(self):
-    return "{} {}".format(self.first_name, self.last_name)
 
 
 @app_views.route('/users', methods=['GET'], strict_slashes=False)

@@ -1,40 +1,42 @@
 #!/usr/bin/env python3
+"""
+Auth class
+"""
 
+from tabnanny import check
 from flask import request
-from typing import List, TypeVar
+from typing import TypeVar, List
+User = TypeVar('User')
 
 
 class Auth:
+    """
+    a class to manage the API authentication
+    """
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        return False
-
-    def authorization_header(self, request=None) -> str:
-        return None
-
-    def current_user(self, request=None) -> TypeVar('User'):
-
-        return None
-
-
-def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-    if path is None or not excluded_paths:
+        """
+        returns False - path and excluded_paths
+        """
+        check = path
+        if path is None or excluded_paths is None or len(excluded_paths) == 0:
+            return True
+        if path[-1] != "/":
+            check += "/"
+        if check in excluded_paths or path in excluded_paths:
+            return False
         return True
 
-    if not path.endswith('/'):
-        path += '/'
+    def authorization_header(self, request=None) -> str:
+        """
+        returns None - request
+        """
+        if request is None:
+            return None
+        return request.headers.get("Authorization")
 
-    for excluded_path in excluded_paths:
-        if not excluded_path.endswith('/'):
-            excluded_path += '/'
-
-        if path == excluded_path:
-            return False
-
-    return True
-
-
-def authorization_header(self, request=None) -> str:
-    if request is None or 'Authorization' not in request.headers:
+    def current_user(self, request=None) -> User:
+        """
+        returns None - request
+        """
         return None
-    return request.headers['Authorization']
