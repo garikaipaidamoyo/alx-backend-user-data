@@ -8,6 +8,9 @@ from flask import Blueprint
 
 app_views = Blueprint("app_views", __name__, url_prefix="/api/v1")
 
+def display_name(self):
+    return "{} {}".format(self.first_name, self.last_name)
+
 
 @app_views.route('/users', methods=['GET'], strict_slashes=False)
 def view_all_users() -> str:
