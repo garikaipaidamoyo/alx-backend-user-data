@@ -6,6 +6,7 @@ from os import getenv
 from api.v1.views import app_views
 from api.v1.auth.auth import Auth
 from api.v1.auth.basic_auth import BasicAuth
+from api.v1.auth.session_auth import SessionAuth
 from flask import Flask, jsonify, abort, request
 from flask_cors import (CORS, cross_origin)
 import os
@@ -19,14 +20,18 @@ auth = os.getenv('AUTH_TYPE')
 auth_repo = {
     'auth': Auth,
     'basic_auth': BasicAuth
-}
+}  
 
 if auth:
     try:
         auth = auth_repo[auth]()
     except Exception:
         auth = None
-
+auth_type = os.environ.get("AUTH_TYPE", "auth")
+if auth_type == "session":
+    auth = SessionAuth()
+else:
+    auth = Auth()
 
 @app.before_request
 def filter():
