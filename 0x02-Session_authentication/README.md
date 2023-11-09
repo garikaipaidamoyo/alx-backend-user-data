@@ -1,28 +1,42 @@
-# 0x02. Session Authentication
+# Simple API
 
-This project implements session-based authentication for a web application.
+Simple HTTP API for playing with `User` model.
+
 
 ## Files
 
-- `session_auth.py`: Contains the SessionAuth class for session-based authentication.
+### `models/`
 
-## Usage
+- `base.py`: base of all models of the API - handle serialization to file
+- `user.py`: user model
 
-To use the session authentication in your project, follow these steps:
+### `api/v1`
 
-1. Import the `SessionAuth` class from `session_auth.py`.
-2. Create an instance of `SessionAuth`.
-3. Set the authentication mechanism for your application using the created instance.
+- `app.py`: entry point of the API
+- `views/index.py`: basic endpoints of the API: `/status` and `/stats`
+- `views/users.py`: all users endpoints
 
-Example:
 
-```python
-from api.v1.auth.session_auth import SessionAuth
+## Setup
 
-# Create an instance of SessionAuth
-session_auth = SessionAuth()
+```
+$ pip3 install -r requirements.txt
+```
 
-# Set as the authentication mechanism for your application
-app.auth = session_auth
 
-Paidamoyo Garikai
+## Run
+
+```
+$ API_HOST=0.0.0.0 API_PORT=5000 python3 -m api.v1.app
+```
+
+
+## Routes
+
+- `GET /api/v1/status`: returns the status of the API
+- `GET /api/v1/stats`: returns some stats of the API
+- `GET /api/v1/users`: returns the list of users
+- `GET /api/v1/users/:id`: returns an user based on the ID
+- `DELETE /api/v1/users/:id`: deletes an user based on the ID
+- `POST /api/v1/users`: creates a new user (JSON parameters: `email`, `password`, `last_name` (optional) and `first_name` (optional))
+- `PUT /api/v1/users/:id`: updates an user based on the ID (JSON parameters: `last_name` and `first_name`)
